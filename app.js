@@ -8,16 +8,12 @@ let compareA=null
 let compareB=null
 let compareStat="weight"
 
-/* ================= LOAD POKEDEX ================= */
-
 async function loadPokedex(){
 
 const res=await fetch("data/pokedex.json")
 pokedex=await res.json()
 
 }
-
-/* ================= MENU ================= */
 
 function startGame(){
 
@@ -35,15 +31,11 @@ document.getElementById("mainMenu").classList.remove("hidden")
 
 }
 
-/* ================= RANDOM ================= */
-
 function getRandomPokemon(){
 
 return pokedex[Math.floor(Math.random()*pokedex.length)]
 
 }
-
-/* ================= SPRITE ================= */
 
 function getSprite(id,mode){
 
@@ -54,8 +46,6 @@ return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon
 return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
 
 }
-
-/* ================= GAME FLOW ================= */
 
 function nextPokemon(){
 
@@ -72,56 +62,89 @@ renderPokemon(mode)
 
 }
 
-/* ================= RENDER ================= */
-
 function renderPokemon(mode){
 
 const sprite=document.getElementById("sprite")
 const hints=document.getElementById("hints")
-const compare=document.getElementById("compare")
-
-compare.innerHTML=""
-hints.innerHTML=""
 
 sprite.style.display="block"
-
 sprite.src=getSprite(currentPokemon.id,mode)
+
 sprite.style.filter="none"
+sprite.classList.remove("reveal")
+
+hints.innerHTML=""
 
 if(mode==="silhouette"){
-sprite.style.filter="brightness(0) contrast(100)"
+sprite.style.filter="brightness(0)"
 }
 
 if(mode==="types"){
 
-hints.innerHTML="Types : "
-
 currentPokemon.types.forEach(t=>{
+
 const span=document.createElement("span")
 span.textContent=t
 span.className="typeBadge"
+
 hints.appendChild(span)
+
 })
 
 }
 
-if(mode==="pokedex"){
+if(document.getElementById("hardMode").checked){
 
-sprite.style.display="none"
+hints.innerHTML=`Color: ${currentPokemon.color}`
 
+}
+
+}
+
+function checkAnswer(){
+
+const guess=document.getElementById("guess").value.toLowerCase().trim()
 const lang=document.getElementById("language").value
 
-hints.innerHTML=`
-<p>Height: ${currentPokemon.height}</p>
-<p>Weight: ${currentPokemon.weight}</p>
-<p>Color: ${currentPokemon.color}</p>
-`
+const correct=currentPokemon.names[lang]
+
+const sprite=document.getElementById("sprite")
+
+sprite.style.filter="none"
+sprite.classList.add("reveal")
+
+if(guess===correct){
+
+score++
+streak++
+
+}else{
+
+streak=0
 
 }
 
+document.getElementById("result").textContent="Réponse : "+correct
+
+updateScore()
+
+document.getElementById("guess").value=""
+
+setTimeout(()=>{
+
+document.getElementById("result").textContent=""
+nextPokemon()
+
+},1500)
+
 }
 
-/* ================= COMPARISON MODE ================= */
+function updateScore(){
+
+document.getElementById("score").textContent="Score: "+score
+document.getElementById("streak").textContent="Streak: "+streak
+
+}
 
 function startCompare(){
 
@@ -136,10 +159,8 @@ function renderCompare(){
 
 const compare=document.getElementById("compare")
 const sprite=document.getElementById("sprite")
-const hints=document.getElementById("hints")
 
 sprite.style.display="none"
-hints.innerHTML=""
 
 const lang=document.getElementById("language").value
 
@@ -159,7 +180,7 @@ ${compareB.names[lang]}
 
 </div>
 
-<p>Who has the biggest ${compareStat} ?</p>
+<p>Qui a le plus de ${compareStat} ?</p>
 
 `
 
@@ -188,43 +209,41 @@ startCompare()
 
 }
 
-/* ================= ANSWER ================= */
+function updateSuggestions(){
 
-function checkAnswer(){
-
-const guess=document.getElementById("guess").value.toLowerCase().trim()
+const input=document.getElementById("guess").value.toLowerCase()
 
 const lang=document.getElementById("language").value
 
-const correct=currentPokemon.names[lang]
+const box=document.getElementById("suggestions")
 
-if(guess===correct){
+box.innerHTML=""
 
-score++
-streak++
+if(input.length<2) return
 
-}else{
+const matches=pokedex
+.map(p=>p.names[lang])
+.filter(name=>name.startsWith(input))
+.slice(0,6)
 
-streak=0
+matches.forEach(name=>{
 
-}
+const div=document.createElement("div")
+div.className="suggestion"
+div.textContent=name
 
-document.getElementById("result").textContent=correct
+div.onclick=()=>{
 
-updateScore()
-
-}
-
-/* ================= SCORE ================= */
-
-function updateScore(){
-
-document.getElementById("score").textContent="Score: "+score
-document.getElementById("streak").textContent="Streak: "+streak
+document.getElementById("guess").value=name
+box.innerHTML=""
 
 }
 
-/* ================= EVENTS ================= */
+box.appendChild(div)
+
+})
+
+}
 
 function initEvents(){
 
@@ -236,14 +255,16 @@ document.getElementById("mode").addEventListener("change",nextPokemon)
 document.getElementById("language").addEventListener("change",nextPokemon)
 
 document.getElementById("guess").addEventListener("keydown",e=>{
+
 if(e.key==="Enter"){
 checkAnswer()
 }
+
 })
 
-}
+document.getElementById("guess").addEventListener("input",updateSuggestions)
 
-/* ================= INIT ================= */
+}
 
 async function init(){
 
