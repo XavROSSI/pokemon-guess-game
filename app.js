@@ -45,6 +45,12 @@ const generations={
 9:[906,1025]
 }
 
+function capitalize(name){
+
+return name.charAt(0).toUpperCase()+name.slice(1)
+
+}
+
 let options={
 language:"fr",
 hardMode:false,
@@ -214,16 +220,22 @@ function renderPokemon(mode){
 
         })
 
-        const dot1=document.createElement("div")
-        dot1.className="colorDot"
-        dot1.style.background=currentPokemon.color
+        const spriteUrl=getSprite(currentPokemon.id,"front")
 
-        const dot2=document.createElement("div")
-        dot2.className="colorDot"
-        dot2.style.background=currentPokemon.color
+        getDominantColor(spriteUrl).then(color=>{
 
-        hints.appendChild(dot1)
-        hints.appendChild(dot2)
+            const dot1=document.createElement("div")
+            dot1.className="colorDot"
+            dot1.style.background=currentPokemon.color
+
+            const dot2=document.createElement("div")
+            dot2.className="colorDot"
+            dot2.style.background=color
+
+            hints.appendChild(dot1)
+            hints.appendChild(dot2)
+
+        })
 
     }
 
@@ -254,7 +266,7 @@ streak=0
 
 }
 
-document.getElementById("result").textContent="Réponse : "+correct
+document.getElementById("result").textContent="Réponse : "+capitalize(correct)
 
 updateScore()
 
@@ -336,13 +348,13 @@ compare.innerHTML=`
 <div class="compareBox">
 
 <div class="comparePokemon" onclick="chooseCompare('A')">
-${compareA.names[lang]}
+${capitalize(compareA.names[lang])}
 </div>
 
 <div> VS </div>
 
 <div class="comparePokemon" onclick="chooseCompare('B')">
-${compareB.names[lang]}
+${capitalize(compareB.names[lang])}
 </div>
 
 </div>
@@ -383,6 +395,53 @@ nextCompare()
 
 }
 let suggestionIndex=-1
+
+async function getDominantColor(url){
+
+    return new Promise(resolve=>{
+
+        const img=new Image()
+
+        img.crossOrigin="Anonymous"
+
+        img.src=url
+
+        img.onload=()=>{
+
+            const canvas=document.createElement("canvas")
+            const ctx=canvas.getContext("2d")
+
+            canvas.width=img.width
+            canvas.height=img.height
+
+            ctx.drawImage(img,0,0)
+
+            const data=ctx.getImageData(0,0,img.width,img.height).data
+
+            let r=0,g=0,b=0,count=0
+
+            for(let i=0;i<data.length;i+=20){
+
+                r+=data[i]
+                g+=data[i+1]
+                b+=data[i+2]
+
+                count++
+
+            }
+
+            r=Math.floor(r/count)
+            g=Math.floor(g/count)
+            b=Math.floor(b/count)
+
+            resolve(`rgb(${r},${g},${b})`)
+
+        }
+
+    })
+
+}
+
 function updateSuggestions(){
 
     const input=document.getElementById("guess").value.toLowerCase()
@@ -406,7 +465,7 @@ function updateSuggestions(){
 
     div.className="suggestion"
 
-    div.textContent=name
+    div.textContent=capitalize(name)
 
     div.onclick=()=>{
 
