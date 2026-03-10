@@ -284,8 +284,17 @@ nextPokemon()
 
 function updateScore(){
 
-document.getElementById("score").textContent="Score: "+score
-document.getElementById("streak").textContent="Streak: "+streak
+    document.getElementById("score").textContent="Score: "+score
+    document.getElementById("streak").textContent="Streak: "+streak
+
+}
+
+function resetScore(){
+
+    score=0
+    streak=0
+
+    updateScore()
 
 }
 
@@ -351,7 +360,7 @@ compare.innerHTML=`
 ${capitalize(compareA.names[lang])}
 </div>
 
-<div> VS </div>
+<div class="vs">VS</div>
 
 <div class="comparePokemon" onclick="chooseCompare('B')">
 ${capitalize(compareB.names[lang])}

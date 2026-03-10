@@ -47,6 +47,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 flex-direction:column;
+gap:10px;
 
 }
 
@@ -131,7 +132,9 @@ border:2px solid black;
 .compareBox{
 
 display:flex;
-justify-content:space-around;
+justify-content:center;
+align-items:center;
+gap:20px;
 font-size:20px;
 
 }
@@ -152,5 +155,12 @@ animation:reveal 0.4s ease;
 
 0%{filter:brightness(0)}
 100%{filter:none}
+
+}
+
+.vs{
+
+margin:0 10px;
+font-weight:bold;
 
 }
