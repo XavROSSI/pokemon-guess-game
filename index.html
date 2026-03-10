@@ -14,6 +14,8 @@
 
 <body>
 
+<!-- MENU PRINCIPAL -->
+
 <div id="mainMenu" class="menu">
 
 <h1>Pokédex Guess Game</h1>
@@ -24,63 +26,64 @@
 </div>
 
 
-<div id="game" class="hidden">
+<!-- MENU OPTIONS -->
 
-    <h2>Who's that Pokémon?</h2>
-
-    <select id="mode">
-
-    <option value="silhouette">Silhouette</option>
-    <option value="back">Sprite dos</option>
-    <option value="types">Types</option>
-    <option value="compare">Comparaison</option>
-
-    </select>
-
-    <label>
-        <input type="checkbox" id="hardMode">
-        Hard mode
-    </label>
-
-</div>
 <div id="optionsMenu" class="menu hidden">
 
-    <h2>Options</h2>
+<h2>Options</h2>
 
-    <h3>Langue</h3>
+<h3>Langue</h3>
 
-    <select id="languageOption">
-        <option value="fr">Français</option>
-        <option value="en">English</option>
-    </select>
+<select id="languageOption">
+<option value="fr">Français</option>
+<option value="en">English</option>
+</select>
 
-    <h3>Générations</h3>
 
-    <div id="genSelector">
+<h3>Générations</h3>
 
-        <label><input type="checkbox" value="1"> Gen1</label>
-        <label><input type="checkbox" value="2"> Gen2</label>
-        <label><input type="checkbox" value="3"> Gen3</label>
-        <label><input type="checkbox" value="4"> Gen4</label>
-        <label><input type="checkbox" value="5"> Gen5</label>
-        <label><input type="checkbox" value="6"> Gen6</label>
-        <label><input type="checkbox" value="7"> Gen7</label>
-        <label><input type="checkbox" value="8"> Gen8</label>
-        <label><input type="checkbox" value="9"> Gen9</label>
+<div id="genSelector">
 
-    </div>
-
-    <label>
-        <input type="checkbox" id="hardModeOption">
-        Hard mode
-    </label>
-
-    <br><br>
-
-    <button onclick="saveOptions()">💾 Sauvegarder</button>
-    <button onclick="closeOptions()">⬅ Retour</button>
+<label><input type="checkbox" value="1"> Gen1</label>
+<label><input type="checkbox" value="2"> Gen2</label>
+<label><input type="checkbox" value="3"> Gen3</label>
+<label><input type="checkbox" value="4"> Gen4</label>
+<label><input type="checkbox" value="5"> Gen5</label>
+<label><input type="checkbox" value="6"> Gen6</label>
+<label><input type="checkbox" value="7"> Gen7</label>
+<label><input type="checkbox" value="8"> Gen8</label>
+<label><input type="checkbox" value="9"> Gen9</label>
 
 </div>
+
+
+<label>
+<input type="checkbox" id="hardModeOption">
+Hard mode
+</label>
+
+<br><br>
+
+<button onclick="saveOptions()">💾 Sauvegarder</button>
+<button onclick="closeOptions()">⬅ Retour</button>
+
+</div>
+
+
+<!-- JEU -->
+
+<div id="game" class="hidden">
+
+<h2>Who's that Pokémon?</h2>
+
+<select id="mode">
+
+<option value="silhouette">Silhouette</option>
+<option value="back">Sprite dos</option>
+<option value="types">Types</option>
+<option value="compare">Comparaison</option>
+
+</select>
 
 
 <div class="screen">
@@ -88,7 +91,6 @@
 <img id="sprite">
 
 <div id="hints"></div>
-
 <div id="compare"></div>
 
 </div>
@@ -109,13 +111,11 @@
 <div id="result"></div>
 
 <div id="score">Score: 0</div>
-
 <div id="streak">Streak: 0</div>
 
-<button onclick="backToMenu()">Retour menu</button>
+<button onclick="backToMenu()">⬅ Retour menu</button>
 
 </div>
-
 
 <script src="app.js"></script>
 

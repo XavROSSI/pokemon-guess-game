@@ -61,12 +61,6 @@ margin:auto;
 
 }
 
-.controls{
-
-margin:10px;
-
-}
-
 input{
 
 padding:8px;
@@ -86,9 +80,10 @@ cursor:pointer;
 
 background:white;
 color:black;
-max-width:200px;
-margin:auto;
+max-width:220px;
+margin:4px auto;
 border-radius:6px;
+overflow:hidden;
 
 }
 
@@ -102,6 +97,13 @@ cursor:pointer;
 .suggestion:hover{
 
 background:#eee;
+
+}
+
+.suggestion.active{
+
+background:#1976d2;
+color:white;
 
 }
 
@@ -140,43 +142,4 @@ animation:reveal 0.4s ease;
 0%{filter:brightness(0)}
 100%{filter:none}
 
-}
-
-.gens{
-
-margin-top:10px;
-
-}
-
-.gens label{
-
-background:#c62828;
-padding:4px 8px;
-border-radius:6px;
-margin:2px;
-display:inline-block;
-
-}
-
-.suggestions{
-background:white;
-color:black;
-max-width:220px;
-margin:4px auto;
-border-radius:6px;
-overflow:hidden;
-}
-
-.suggestion{
-padding:6px;
-cursor:pointer;
-}
-
-.suggestion:hover{
-background:#eee;
-}
-
-.suggestion.active{
-background:#1976d2;
-color:white;
 }

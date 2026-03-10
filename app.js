@@ -7,8 +7,8 @@ let streak=0
 let compareA=null
 let compareB=null
 let compareStat="weight"
+
 let suggestionIndex=-1
-let currentSuggestions=[]
 
 const generations={
 1:[1,151],
@@ -30,112 +30,72 @@ gens:[1,2,3,4,5,6,7,8,9]
 
 function loadOptions(){
 
-    const saved=JSON.parse(localStorage.getItem("pokemonOptions"))
+const saved=JSON.parse(localStorage.getItem("pokemonOptions"))
 
-    if(saved) options=saved
+if(saved) options=saved
 
-    document.getElementById("languageOption").value=options.language
-    document.getElementById("hardModeOption").checked=options.hardMode
+document.getElementById("languageOption").value=options.language
+document.getElementById("hardModeOption").checked=options.hardMode
 
-    document.querySelectorAll("#genSelector input").forEach(cb=>{
-
-        cb.checked=options.gens.includes(parseInt(cb.value))
-
-    })
+document.querySelectorAll("#genSelector input").forEach(cb=>{
+cb.checked=options.gens.includes(parseInt(cb.value))
+})
 
 }
 
 async function loadPokedex(){
 
 const res=await fetch("data/pokedex.json")
+
 pokedex=await res.json()
-
-}
-
-function navigateSuggestions(e){
-
-const items=document.querySelectorAll(".suggestion")
-
-if(!items.length) return
-
-if(e.key==="ArrowDown"){
-
-suggestionIndex++
-
-if(suggestionIndex>=items.length) suggestionIndex=0
-
-}
-
-if(e.key==="ArrowUp"){
-
-suggestionIndex--
-
-if(suggestionIndex<0) suggestionIndex=items.length-1
-
-}
-
-items.forEach(el=>el.classList.remove("active"))
-
-if(items[suggestionIndex]){
-
-items[suggestionIndex].classList.add("active")
-
-document.getElementById("guess").value=
-items[suggestionIndex].textContent
-
-}
 
 }
 
 function startGame(){
 
-    document.getElementById("mainMenu").classList.add("hidden")
-    document.getElementById("game").classList.remove("hidden")
+document.getElementById("mainMenu").classList.add("hidden")
+document.getElementById("game").classList.remove("hidden")
 
-    nextPokemon()
+nextPokemon()
 
 }
 
 function openOptions(){
 
-    document.getElementById("mainMenu").classList.add("hidden")
-    document.getElementById("optionsMenu").classList.remove("hidden")
+document.getElementById("mainMenu").classList.add("hidden")
+document.getElementById("optionsMenu").classList.remove("hidden")
 
-    loadOptions()
+loadOptions()
 
 }
 
 function closeOptions(){
 
-    document.getElementById("optionsMenu").classList.add("hidden")
-    document.getElementById("mainMenu").classList.remove("hidden")
+document.getElementById("optionsMenu").classList.add("hidden")
+document.getElementById("mainMenu").classList.remove("hidden")
 
 }
 
 function saveOptions(){
 
-    const language=document.getElementById("languageOption").value
-    const hardMode=document.getElementById("hardModeOption").checked
+const language=document.getElementById("languageOption").value
+const hardMode=document.getElementById("hardModeOption").checked
 
-    const gens=[...document.querySelectorAll("#genSelector input:checked")]
-    .map(e=>parseInt(e.value))
+const gens=[...document.querySelectorAll("#genSelector input:checked")]
+.map(e=>parseInt(e.value))
 
-    localStorage.setItem("pokemonOptions",JSON.stringify({
+options={language,hardMode,gens}
 
-    language,
-    hardMode,
-    gens
+localStorage.setItem("pokemonOptions",JSON.stringify(options))
 
-    }))
-
-    closeOptions()
+closeOptions()
 
 }
 
 function backToMenu(){
 
-    document.getElementById("game").classList.add("hidden")
-    document.getElementById("mainMenu").classList.remove("hidden")
+document.getElementById("game").classList.add("hidden")
+document.getElementById("mainMenu").classList.remove("hidden")
 
 }
 
@@ -194,10 +154,10 @@ const sprite=document.getElementById("sprite")
 const hints=document.getElementById("hints")
 
 sprite.style.display="block"
+
 sprite.src=getSprite(currentPokemon.id,mode)
 
 sprite.style.filter="none"
-sprite.classList.remove("reveal")
 
 hints.innerHTML=""
 
@@ -230,6 +190,7 @@ hints.innerHTML=`Color: ${currentPokemon.color}`
 function checkAnswer(){
 
 const guess=document.getElementById("guess").value.toLowerCase().trim()
+
 const lang=options.language
 
 const correct=currentPokemon.names[lang]
@@ -259,6 +220,7 @@ document.getElementById("guess").value=""
 setTimeout(()=>{
 
 document.getElementById("result").textContent=""
+
 nextPokemon()
 
 },1500)
@@ -338,28 +300,31 @@ startCompare()
 function updateSuggestions(){
 
 const input=document.getElementById("guess").value.toLowerCase()
+
 const lang=options.language
+
 const box=document.getElementById("suggestions")
 
 box.innerHTML=""
-suggestionIndex=-1
 
 if(input.length<2) return
 
-currentSuggestions=pokedex
+pokedex
 .map(p=>p.names[lang])
 .filter(name=>name.startsWith(input))
 .slice(0,6)
-
-currentSuggestions.forEach((name,i)=>{
+.forEach(name=>{
 
 const div=document.createElement("div")
+
 div.className="suggestion"
+
 div.textContent=name
 
 div.onclick=()=>{
 
 document.getElementById("guess").value=name
+
 box.innerHTML=""
 
 }
@@ -377,8 +342,6 @@ document.getElementById("skipBtn").onclick=nextPokemon
 
 document.getElementById("mode").addEventListener("change",nextPokemon)
 
-document.getElementById("language").addEventListener("change",nextPokemon)
-
 const guessInput=document.getElementById("guess")
 
 guessInput.addEventListener("input",updateSuggestions)
@@ -389,13 +352,7 @@ if(e.key==="Enter"){
 checkAnswer()
 }
 
-if(e.key==="ArrowDown" || e.key==="ArrowUp"){
-navigateSuggestions(e)
-}
-
 })
-
-document.getElementById("guess").addEventListener("input",updateSuggestions)
 
 }
 
