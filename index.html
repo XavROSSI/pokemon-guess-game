@@ -3,78 +3,139 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Who's That Pokémon?</title>
+<title>Who's that Pokémon</title>
 <style>
-body{font-family:Arial,Helvetica,sans-serif;text-align:center;background:#f5f5f5;margin:0;padding:10px}
-h1{margin-top:10px}
-#sprite{image-rendering:pixelated;width:180px;height:180px;max-width:80vw}
-.silhouette{filter:brightness(0)}
-input,button,select{padding:10px;font-size:16px;margin:5px}
+body{
+font-family:Verdana,Arial;
+background:#d32f2f;
+margin:0;
+padding:10px;
+color:white;
+text-align:center
+}
+
+.pokedex{
+background:#ef5350;
+padding:15px;
+border-radius:15px;
+max-width:500px;
+margin:auto;
+box-shadow:0 10px 25px rgba(0,0,0,0.4)
+}
+
+.screen{
+background:#111;
+padding:20px;
+border-radius:10px;
+margin-bottom:15px
+}
+
+#sprite{
+image-rendering:pixelated;
+width:180px;
+height:180px;
+filter:brightness(0)
+}
+
+.controls{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:8px;
+margin-bottom:10px
+}
+
+input,button,select{
+padding:10px;
+font-size:16px;
+border-radius:6px;
+border:none
+}
+
 button{cursor:pointer}
+
+.genBox{
+background:#c62828;
+padding:5px 8px;
+border-radius:6px
+}
+
 #result{margin-top:10px;font-weight:bold}
+
 #score{margin-top:5px}
-#leaderboard{margin-top:20px}
-#leaderboard ol{padding-left:20px;text-align:left;max-width:250px;margin:auto}
-.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+
+#leaderboard{
+margin-top:20px;
+background:#b71c1c;
+padding:10px;
+border-radius:10px
+}
+
+#leaderboard ol{
+text-align:left;
+max-width:250px;
+margin:auto
+}
+
+.timer{
+font-size:18px;
+margin-bottom:5px
+}
+
 </style>
 </head>
 <body>
 
-<h1>Who's that Pokémon?</h1>
+<div class="pokedex">
+
+<h2>Who's that Pokémon?</h2>
+
+<div class="screen">
+<img id="sprite" />
+</div>
 
 <div class="controls">
 <select id="language">
-<option value="fr">Français</option>
-<option value="en">English</option>
-<option value="de">Deutsch</option>
-<option value="es">Español</option>
-<option value="it">Italiano</option>
-<option value="ja">日本語</option>
-<option value="ko">한국어</option>
+<option value="fr">FR</option>
+<option value="en">EN</option>
+<option value="de">DE</option>
+<option value="es">ES</option>
+<option value="it">IT</option>
+<option value="ja">JP</option>
+<option value="ko">KR</option>
 </select>
 
-<select id="generation">
-<option value="all">Toutes générations</option>
-<option value="1">Gen 1</option>
-<option value="2">Gen 2</option>
-<option value="3">Gen 3</option>
-<option value="4">Gen 4</option>
-<option value="5">Gen 5</option>
-<option value="6">Gen 6</option>
-<option value="7">Gen 7</option>
-<option value="8">Gen 8</option>
-<option value="9">Gen 9</option>
-</select>
-
-<label>
-<input type="checkbox" id="progressive" /> silhouette progressive
-</label>
+<label><input type="checkbox" id="progressive"> Reveal progressif</label>
+<label><input type="checkbox" id="chrono"> Mode chrono</label>
 </div>
 
-<div>
-<img id="sprite" class="silhouette" />
-</div>
+<div class="controls" id="genSelector"></div>
+
+<div class="timer" id="timer"></div>
 
 <div>
-<input id="guess" placeholder="Nom du Pokémon" />
-<button onclick="checkAnswer()">Valider</button>
-<button onclick="nextPokemon()">Suivant</button>
+<input id="guess" placeholder="Nom du Pokémon">
+<button onclick="checkAnswer()">OK</button>
+<button onclick="nextPokemon()">Skip</button>
 </div>
 
 <div id="result"></div>
 <div id="score">Score: 0</div>
+<div id="streak">Streak: 0</div>
 
 <div id="leaderboard">
 <h3>Leaderboard</h3>
 <ol id="scores"></ol>
-<input id="playerName" placeholder="Ton nom" />
-<button onclick="saveScore()">Sauver score</button>
+<input id="playerName" placeholder="Nom">
+<button onclick="saveScore()">Save</button>
+</div>
+
 </div>
 
 <script>
 
 // ===== GENERATION RANGES =====
-const generations = {
+const generations={
 1:[1,151],
 2:[152,251],
 3:[252,386],
@@ -87,104 +148,138 @@ const generations = {
 }
 
 // ===== STATE =====
-let pokemonCache=[]
 let currentPokemon=null
 let score=0
+let streak=0
 let revealInterval=null
+let timerInterval=null
+let timeLeft=30
 
-// ===== LOAD ALL POKEMON =====
-async function loadPokemon(){
-
-const MAX=1025
-
-const promises=[]
-
-for(let i=1;i<=MAX;i++){
- promises.push(loadOne(i))
+// ===== SPRITE URL =====
+function getSprite(id){
+return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
 }
 
-pokemonCache=await Promise.all(promises)
+// ===== GENERATION SELECTOR =====
+function initGenSelector(){
 
-nextPokemon()
+const container=document.getElementById("genSelector")
+
+for(let g=1;g<=9;g++){
+
+const label=document.createElement("label")
+label.className="genBox"
+
+label.innerHTML=`<input type="checkbox" value="${g}" checked> Gen ${g}`
+
+container.appendChild(label)
+
 }
 
-async function loadOne(id){
+}
 
-const p=await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-const pdata=await p.json()
+function getSelectedGenerations(){
 
-const s=await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`)
-const sdata=await s.json()
+const checked=[...document.querySelectorAll("#genSelector input:checked")]
+
+return checked.map(c=>parseInt(c.value))
+
+}
+
+function getRandomPokemon(){
+
+const gens=getSelectedGenerations()
+
+let pool=[]
+
+gens.forEach(g=>{
+
+const range=generations[g]
+
+for(let i=range[0];i<=range[1];i++){
+ pool.push(i)
+}
+
+})
+
+return pool[Math.floor(Math.random()*pool.length)]
+
+}
+
+// ===== TIMER =====
+function startTimer(){
+
+clearInterval(timerInterval)
+
+if(!document.getElementById("chrono").checked){
+ document.getElementById("timer").textContent=""
+ return
+}
+
+ timeLeft=30
+ document.getElementById("timer").textContent=`⏱ ${timeLeft}s`
+
+ timerInterval=setInterval(()=>{
+
+ timeLeft--
+
+ document.getElementById("timer").textContent=`⏱ ${timeLeft}s`
+
+ if(timeLeft<=0){
+
+ clearInterval(timerInterval)
+
+ document.getElementById("result").textContent="Temps écoulé"
+
+ nextPokemon()
+
+ }
+
+ },1000)
+
+}
+
+// ===== LOAD POKEMON =====
+async function nextPokemon(){
+
+clearInterval(revealInterval)
+
+const id=getRandomPokemon()
+
+const species=await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`)
+const data=await species.json()
 
 const names={}
 
-sdata.names.forEach(n=>{
+data.names.forEach(n=>{
  names[n.language.name]=n.name.toLowerCase()
 })
 
-return{
- id,
- sprite:pdata.sprites.front_default,
- names
-}
-
-}
-
-// ===== FILTER BY GENERATION =====
-function getFilteredPokemon(){
-
-const gen=document.getElementById("generation").value
-
-if(gen==="all") return pokemonCache
-
-const range=generations[gen]
-
-return pokemonCache.filter(p=>p.id>=range[0] && p.id<=range[1])
-
-}
-
-// ===== NEXT POKEMON =====
-function nextPokemon(){
-
-if(revealInterval) clearInterval(revealInterval)
-
-const list=getFilteredPokemon()
-
-const index=Math.floor(Math.random()*list.length)
-
-currentPokemon=list[index]
+currentPokemon={id,names}
 
 const sprite=document.getElementById("sprite")
 
-sprite.src=currentPokemon.sprite
-sprite.classList.add("silhouette")
+sprite.src=getSprite(id)
+
+sprite.style.filter="brightness(0)"
 
 if(document.getElementById("progressive").checked){
- startProgressiveReveal()
-}
-
-document.getElementById("guess").value=""
-document.getElementById("result").textContent=""
-
-}
-
-// ===== PROGRESSIVE SILHOUETTE =====
-function startProgressiveReveal(){
 
 let level=0
-const sprite=document.getElementById("sprite")
 
 revealInterval=setInterval(()=>{
 
-level+=10
+level+=0.1
 
-sprite.style.filter=`brightness(${level/100})`
+sprite.style.filter=`brightness(${level})`
 
-if(level>=100){
- clearInterval(revealInterval)
-}
+if(level>=1) clearInterval(revealInterval)
 
 },1000)
+
+}
+
+startTimer()
 
 }
 
@@ -192,28 +287,37 @@ if(level>=100){
 function checkAnswer(){
 
 const guess=document.getElementById("guess").value.toLowerCase().trim()
+
 const lang=document.getElementById("language").value
 
 const correct=currentPokemon.names[lang]
 
 const sprite=document.getElementById("sprite")
 
+sprite.style.filter="brightness(1)"
+
 if(guess===correct){
- score++
- document.getElementById("result").textContent=`Correct ! ${correct}`
+
+score++
+streak++
+
 }else{
- document.getElementById("result").textContent=`Raté ! C'était ${correct}`
-}
 
-sprite.classList.remove("silhouette")
-
-sprite.style.filter=""
-
-clearInterval(revealInterval)
-
-document.getElementById("score").textContent=`Score: ${score}`
+streak=0
 
 }
+
+ document.getElementById("result").textContent=`${correct}`
+ document.getElementById("score").textContent=`Score: ${score}`
+ document.getElementById("streak").textContent=`Streak: ${streak}`
+
+}
+
+// ===== ENTER KEY =====
+
+document.getElementById("guess").addEventListener("keydown",e=>{
+ if(e.key==="Enter") checkAnswer()
+})
 
 // ===== LEADERBOARD =====
 function loadScores(){
@@ -254,8 +358,9 @@ loadScores()
 
 // ===== INIT =====
 
+initGenSelector()
 loadScores()
-loadPokemon()
+nextPokemon()
 
 </script>
 
