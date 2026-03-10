@@ -9,6 +9,13 @@
 
 <style>
 body{font-family:Verdana,Arial;background:#d32f2f;margin:0;padding:10px;color:white;text-align:center}
+.hidden{display:none}
+
+/* MENU */
+.menu{max-width:420px;margin:auto;background:#ef5350;padding:20px;border-radius:15px;box-shadow:0 10px 25px rgba(0,0,0,0.4)}
+.menu button{display:block;width:100%;margin:10px 0;padding:14px;font-size:18px}
+
+/* GAME */
 .pokedex{background:#ef5350;padding:15px;border-radius:15px;max-width:520px;margin:auto;box-shadow:0 10px 25px rgba(0,0,0,0.4)}
 .screen{background:#e0e0e0;padding:20px;border-radius:10px;margin-bottom:15px;color:black}
 #sprite{image-rendering:pixelated;width:180px;height:180px;background:#e0e0e0}
@@ -27,7 +34,16 @@ button{cursor:pointer}
 </head>
 <body>
 
-<div class="pokedex">
+<!-- MAIN MENU -->
+<div id="mainMenu" class="menu">
+<h2>Pokédex Guess Game</h2>
+<button onclick="startGame()">🎮 Jouer</button>
+<button onclick="openLeaderboard()">🏆 Leaderboard</button>
+<button onclick="openSettings()">⚙️ Options</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="pokedex hidden">
 
 <h2>Who's that Pokémon?</h2>
 
@@ -81,13 +97,24 @@ button{cursor:pointer}
 <button id="saveScoreBtn">Save</button>
 </div>
 
+<button onclick="backToMenu()">⬅ Retour menu</button>
+
 </div>
 
 <script>
 
-/* STATE */
+/* ================= STATE ================= */
 
 const generations={1:[1,151],2:[152,251],3:[252,386],4:[387,493],5:[494,649],6:[650,721],7:[722,809],8:[810,905],9:[906,1025]}
+
+const statTranslations={
+ weight:{fr:"poids",en:"weight"},
+ height:{fr:"taille",en:"height"},
+ attack:{fr:"attaque",en:"attack"},
+ defense:{fr:"défense",en:"defense"},
+ speed:{fr:"vitesse",en:"speed"},
+ hp:{fr:"PV",en:"hp"}
+}
 
 let currentPokemon=null
 let score=0
@@ -101,7 +128,23 @@ let compareA=null
 let compareB=null
 let compareFlip=false
 
-/* UTILS */
+/* ================= MENU ================= */
+
+function startGame(){
+ document.getElementById("mainMenu").classList.add("hidden")
+ document.getElementById("game").classList.remove("hidden")
+ nextPokemon()
+}
+
+function backToMenu(){
+ document.getElementById("game").classList.add("hidden")
+ document.getElementById("mainMenu").classList.remove("hidden")
+}
+
+function openLeaderboard(){alert("Leaderboard dans le jeu")}
+function openSettings(){alert("Options bientôt disponibles")}
+
+/* ================= UTILS ================= */
 
 function randomFromArray(arr){return arr[Math.floor(Math.random()*arr.length)]}
 
@@ -110,7 +153,7 @@ if(mode==="back") return `https://raw.githubusercontent.com/PokeAPI/sprites/mast
 return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
 }
 
-/* GENERATIONS */
+/* ================= GENERATIONS ================= */
 
 function initGenSelector(){
 const container=document.getElementById("genSelector")
@@ -133,7 +176,7 @@ gens.forEach(g=>{const [min,max]=generations[g];for(let i=min;i<=max;i++) pool.p
 return randomFromArray(pool)
 }
 
-/* TIMER */
+/* ================= TIMER ================= */
 
 function startTimer(){
 clearInterval(timerInterval)
@@ -172,55 +215,7 @@ return
  },1000)
 }
 
-/* COLOR ANALYSIS */
-
-function simplifyColor(r,g,b){
-if(r>200 && g>200 && b<100) return "yellow"
-if(r>200 && g<120 && b<120) return "red"
-if(r>200 && g>120 && b<80) return "orange"
-if(g>150 && r<120 && b<120) return "green"
-if(g>80 && g<150 && r<80) return "darkgreen"
-if(b>150 && r<120 && g<120) return "blue"
-if(r<60 && g<60 && b<60) return "black"
-if(r>200 && g>200 && b>200) return "white"
-return "gray"
-}
-
-function uniqueColors(colors){return [...new Set(colors)]}
-
-async function extractColors(url){
-const img=new Image()
-img.crossOrigin="Anonymous"
-img.src=url
-await img.decode()
-
-const canvas=document.createElement("canvas")
-const ctx=canvas.getContext("2d")
-canvas.width=img.width
-canvas.height=img.height
-ctx.drawImage(img,0,0)
-
-const data=ctx.getImageData(0,0,canvas.width,canvas.height).data
-
-let palette=[]
-
-for(let i=0;i<data.length;i+=40){
-const r=data[i]
-const g=data[i+1]
-const b=data[i+2]
-const a=data[i+3]
-
-if(a<200) continue
-
-palette.push(simplifyColor(r,g,b))
-}
-
-palette=uniqueColors(palette)
-
-return palette.slice(0,2)
-}
-
-/* POKEMON LOAD */
+/* ================= LOAD POKEMON ================= */
 
 async function loadPokemon(id){
 
@@ -237,7 +232,6 @@ return{
 id,
 names,
 types:pokemonData.types.map(t=>t.type.name),
-color:speciesData.color.name,
 weight:pokemonData.weight,
 height:pokemonData.height,
 stats:Object.fromEntries(pokemonData.stats.map(s=>[s.stat.name,s.base_stat])),
@@ -245,7 +239,7 @@ flavor:speciesData.flavor_text_entries
 }
 }
 
-/* MAIN GAME */
+/* ================= GAME ================= */
 
 async function nextPokemon(){
 
@@ -263,7 +257,7 @@ renderPokemon()
 startTimer()
 }
 
-/* RENDER */
+/* ================= RENDER ================= */
 
 async function renderPokemon(){
 
@@ -277,39 +271,14 @@ compare.innerHTML=""
 
 sprite.src=getSprite(currentPokemon.id,mode)
 
-if(mode==="silhouette"){
 sprite.style.display="block"
+sprite.style.filter="none"
+
+if(mode==="silhouette"){
 sprite.style.filter="brightness(0)"
 }
 
-else if(mode==="back"){
-sprite.style.display="block"
-sprite.style.filter="brightness(1)"
-}
-
-else if(mode==="types"){
-
-sprite.style.display="none"
-
-currentPokemon.types.forEach(t=>{
-const badge=document.createElement("div")
-badge.className="typeBadge"
-badge.textContent=t
-hints.appendChild(badge)
-})
-
-const colors=await extractColors(getSprite(currentPokemon.id,"normal"))
-
-colors.forEach(c=>{
-const dot=document.createElement("div")
-dot.className="colorDot"
-dot.style.background=c
-hints.appendChild(dot)
-})
-
-}
-
-else if(mode==="pokedex"){
+if(mode==="pokedex"){
 
 sprite.style.display="none"
 
@@ -329,7 +298,7 @@ hints.textContent=text
 
 }
 
-/* COMPARISON MODE */
+/* ================= COMPARISON MODE ================= */
 
 async function nextCompare(){
 
@@ -339,6 +308,9 @@ const hints=document.getElementById("hints")
 
 sprite.style.display="none"
 hints.innerHTML=""
+
+const lang=document.getElementById("language").value
+const statName=statTranslations[compareStat][lang] || compareStat
 
 if(!compareA){
 compareA=await loadPokemon(getRandomPokemon())
@@ -357,11 +329,11 @@ compareFlip=!compareFlip
 
 compareBox.innerHTML=`
 <div class="compareBox">
-<div class="comparePokemon" onclick="chooseCompare('A')">${compareA.names.en}</div>
+<div class="comparePokemon" onclick="chooseCompare('A')">${compareA.names[lang]}</div>
 <div>VS</div>
-<div class="comparePokemon" onclick="chooseCompare('B')">${compareB.names.en}</div>
+<div class="comparePokemon" onclick="chooseCompare('B')">${compareB.names[lang]}</div>
 </div>
-<p>Qui a le plus de ${compareStat} ?</p>
+<p>${lang==='fr'?'Qui a le plus de':'Who has the most'} ${statName} ?</p>
 `
 
 }
@@ -373,12 +345,7 @@ let correct
 if(compareA[compareStat]>compareB[compareStat]) correct="A"
 else correct="B"
 
-if(choice===correct){
-score++
-streak++
-}else{
-streak=0
-}
+if(choice===correct){score++;streak++}else{streak=0}
 
  document.getElementById("score").textContent=`Score: ${score}`
  document.getElementById("streak").textContent=`Streak: ${streak}`
@@ -387,7 +354,7 @@ nextCompare()
 
 }
 
-/* CHECK ANSWER */
+/* ================= CHECK ANSWER ================= */
 
 function checkAnswer(){
 
@@ -398,7 +365,7 @@ const correct=currentPokemon.names[lang]
 if(guess===correct){score++;streak++}else{streak=0}
 
 const sprite=document.getElementById("sprite")
-sprite.style.filter="brightness(1)"
+sprite.style.filter="none"
 
  document.getElementById("result").textContent=`${correct}`
  document.getElementById("score").textContent=`Score: ${score}`
@@ -406,7 +373,7 @@ sprite.style.filter="brightness(1)"
 
 }
 
-/* LEADERBOARD */
+/* ================= LEADERBOARD ================= */
 
 function loadScores(){
 
@@ -439,7 +406,7 @@ localStorage.setItem("pokemonScores",JSON.stringify(scores))
 loadScores()
 }
 
-/* EVENTS */
+/* ================= EVENTS ================= */
 
 function initEvents(){
 
@@ -451,15 +418,22 @@ function initEvents(){
  if(e.key==="Enter") checkAnswer()
  })
 
+ document.getElementById("mode").addEventListener("change",()=>{
+ nextPokemon()
+ })
+
+ document.getElementById("language").addEventListener("change",()=>{
+ nextPokemon()
+ })
+
 }
 
-/* INIT */
+/* ================= INIT ================= */
 
 function init(){
 initGenSelector()
 initEvents()
 loadScores()
-nextPokemon()
 }
 
 init()
