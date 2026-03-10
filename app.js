@@ -51,6 +51,25 @@ hardMode:false,
 gens:[1,2,3,4,5,6,7,8,9]
 }
 
+function loadOptions(){
+
+    const saved=JSON.parse(localStorage.getItem("pokemonOptions"))
+
+    if(saved){
+    options=saved
+    }
+
+    document.getElementById("languageOption").value=options.language
+    document.getElementById("hardModeOption").checked=options.hardMode
+
+    document.querySelectorAll("#genSelector input").forEach(cb=>{
+
+    cb.checked=options.gens.includes(parseInt(cb.value))
+
+    })
+
+}
+
 async function loadPokedex(){
 const res=await fetch("data/pokedex.json")
 pokedex=await res.json()
@@ -103,6 +122,34 @@ function openOptions(){
 
 function closeOptions(){
 
+    document.getElementById("optionsMenu").classList.add("hidden")
+    document.getElementById("mainMenu").classList.remove("hidden")
+
+}
+
+function saveOptions(){
+
+    const language=document.getElementById("languageOption").value
+    const hardMode=document.getElementById("hardModeOption").checked
+
+    const gens=[...document.querySelectorAll("#genSelector input:checked")]
+    .map(e=>parseInt(e.value))
+
+    options={
+    language:language,
+    hardMode:hardMode,
+    gens:gens
+    }
+
+    localStorage.setItem("pokemonOptions",JSON.stringify(options))
+
+    closeOptions()
+
+}
+
+function backToMenu(){
+
+    document.getElementById("game").classList.add("hidden")
     document.getElementById("optionsMenu").classList.add("hidden")
     document.getElementById("mainMenu").classList.remove("hidden")
 
@@ -335,6 +382,45 @@ updateScore()
 nextCompare()
 
 }
+let suggestionIndex=-1
+function updateSuggestions(){
+
+    const input=document.getElementById("guess").value.toLowerCase()
+
+    const lang=options.language
+
+    const box=document.getElementById("suggestions")
+
+    box.innerHTML=""
+    suggestionIndex=-1
+
+    if(input.length<2) return
+
+    pokedex
+    .map(p=>p.names[lang])
+    .filter(name=>name.startsWith(input))
+    .slice(0,6)
+    .forEach(name=>{
+
+    const div=document.createElement("div")
+
+    div.className="suggestion"
+
+    div.textContent=name
+
+    div.onclick=()=>{
+
+        document.getElementById("guess").value=name
+
+        box.innerHTML=""
+
+    }
+
+    box.appendChild(div)
+
+    })
+
+}
 
 function initEvents(){
 
@@ -345,10 +431,35 @@ function initEvents(){
     const guessInput=document.getElementById("guess")
     guessInput.addEventListener("input",updateSuggestions)
     guessInput.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+        checkAnswer()
+    }
 
-        if(e.key==="Enter"){
-            checkAnswer()
+    if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+
+        const items=document.querySelectorAll(".suggestion")
+
+        if(!items.length) return
+
+        if(e.key==="ArrowDown"){
+            suggestionIndex++
         }
+
+        if(e.key==="ArrowUp"){
+            suggestionIndex--
+        }
+
+        if(suggestionIndex>=items.length) suggestionIndex=0
+        if(suggestionIndex<0) suggestionIndex=items.length-1
+
+        items.forEach(el=>el.classList.remove("active"))
+
+        items[suggestionIndex].classList.add("active")
+
+        document.getElementById("guess").value=
+        items[suggestionIndex].textContent
+
+    }
 
     })
 }
@@ -356,6 +467,8 @@ function initEvents(){
 async function init(){
 
 await loadPokedex()
+
+loadOptions()
 
 initEvents()
 
