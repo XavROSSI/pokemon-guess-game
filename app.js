@@ -341,7 +341,7 @@ if(e.key==="ArrowDown" || e.key==="ArrowUp"){
 navigateSuggestions(e)
 }
 
-}))
+})
 
 document.getElementById("guess").addEventListener("input",updateSuggestions)
 
