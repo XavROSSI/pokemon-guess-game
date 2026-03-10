@@ -91,6 +91,23 @@ return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon
 
 }
 
+function openOptions(){
+
+    document.getElementById("mainMenu").classList.add("hidden")
+    document.getElementById("game").classList.add("hidden")
+    document.getElementById("optionsMenu").classList.remove("hidden")
+
+    loadOptions()
+
+}
+
+function closeOptions(){
+
+    document.getElementById("optionsMenu").classList.add("hidden")
+    document.getElementById("mainMenu").classList.remove("hidden")
+
+}
+
 function startGame(){
 
 document.getElementById("mainMenu").classList.add("hidden")
@@ -117,49 +134,51 @@ renderPokemon(mode)
 
 function renderPokemon(mode){
 
-const sprite=document.getElementById("sprite")
-const hints=document.getElementById("hints")
-const compare=document.getElementById("compare")
+    const sprite=document.getElementById("sprite")
+    const hints=document.getElementById("hints")
+    const compare=document.getElementById("compare")
 
-compare.innerHTML=""
-hints.innerHTML=""
+    compare.innerHTML=""
+    hints.innerHTML=""
+    sprite.style.display="block"
 
-sprite.style.display="block"
-sprite.src=getSprite(currentPokemon.id,mode)
-sprite.style.filter="none"
+    sprite.style.display="block"
+    sprite.src=getSprite(currentPokemon.id,mode)
+    sprite.style.filter="none"
 
-if(mode==="silhouette" || mode==="back"){
-sprite.style.filter="brightness(0)"
-}
+    if(mode==="silhouette" || mode==="back"){
+        sprite.style.filter="brightness(0)"
+    }
 
-if(mode==="types"){
+    sprite.style.display="block"
+    if(mode==="types"){
 
-sprite.style.display="none"
+        sprite.style.display="none"
 
-currentPokemon.types.forEach(t=>{
+        currentPokemon.types.forEach(t=>{
 
-const span=document.createElement("span")
+            const span=document.createElement("span")
 
-span.textContent=t
-span.className="typeBadge"
-span.style.background=typeColors[t]
+            span.textContent=t
+            span.className="typeBadge"
+            span.style.background=typeColors[t]
 
-hints.appendChild(span)
+            hints.appendChild(span)
 
-})
+        })
 
-const dot1=document.createElement("div")
-dot1.className="colorDot"
-dot1.style.background=currentPokemon.color
+        const dot1=document.createElement("div")
+        dot1.className="colorDot"
+        dot1.style.background=currentPokemon.color
 
-const dot2=document.createElement("div")
-dot2.className="colorDot"
-dot2.style.background=currentPokemon.color
+        const dot2=document.createElement("div")
+        dot2.className="colorDot"
+        dot2.style.background=currentPokemon.color
 
-hints.appendChild(dot1)
-hints.appendChild(dot2)
+        hints.appendChild(dot1)
+        hints.appendChild(dot2)
 
-}
+    }
 
 }
 
@@ -319,11 +338,19 @@ nextCompare()
 
 function initEvents(){
 
-document.getElementById("validateBtn").onclick=checkAnswer
-document.getElementById("skipBtn").onclick=nextPokemon
+    document.getElementById("validateBtn").onclick=checkAnswer
+    document.getElementById("skipBtn").onclick=nextPokemon
 
-document.getElementById("mode").addEventListener("change",nextPokemon)
+    document.getElementById("mode").addEventListener("change",nextPokemon)
+    const guessInput=document.getElementById("guess")
+    guessInput.addEventListener("input",updateSuggestions)
+    guessInput.addEventListener("keydown",e=>{
 
+        if(e.key==="Enter"){
+            checkAnswer()
+        }
+
+    })
 }
 
 async function init(){
