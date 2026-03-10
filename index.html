@@ -19,49 +19,66 @@
 <h1>Pokédex Guess Game</h1>
 
 <button onclick="startGame()">🎮 Jouer</button>
+<button onclick="openOptions()">⚙ Options</button>
 
 </div>
 
 
 <div id="game" class="hidden">
 
-<h2>Who's that Pokémon?</h2>
+    <h2>Who's that Pokémon?</h2>
 
-<div class="controls">
-<div id="genSelector" class="gens">
+    <select id="mode">
 
-<label><input type="checkbox" value="1" checked> Gen1</label>
-<label><input type="checkbox" value="2" checked> Gen2</label>
-<label><input type="checkbox" value="3" checked> Gen3</label>
-<label><input type="checkbox" value="4" checked> Gen4</label>
-<label><input type="checkbox" value="5" checked> Gen5</label>
-<label><input type="checkbox" value="6" checked> Gen6</label>
-<label><input type="checkbox" value="7" checked> Gen7</label>
-<label><input type="checkbox" value="8" checked> Gen8</label>
-<label><input type="checkbox" value="9" checked> Gen9</label>
+    <option value="silhouette">Silhouette</option>
+    <option value="back">Sprite dos</option>
+    <option value="types">Types</option>
+    <option value="compare">Comparaison</option>
+
+    </select>
+
+    <label>
+        <input type="checkbox" id="hardMode">
+        Hard mode
+    </label>
 
 </div>
+<div id="optionsMenu" class="menu hidden">
 
-<select id="mode">
+    <h2>Options</h2>
 
-<option value="silhouette">Silhouette</option>
-<option value="back">Sprite dos</option>
-<option value="types">Types</option>
-<option value="compare">Comparaison</option>
+    <h3>Langue</h3>
 
-</select>
+    <select id="languageOption">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+    </select>
 
-<select id="language">
+    <h3>Générations</h3>
 
-<option value="fr">FR</option>
-<option value="en">EN</option>
+    <div id="genSelector">
 
-</select>
+        <label><input type="checkbox" value="1"> Gen1</label>
+        <label><input type="checkbox" value="2"> Gen2</label>
+        <label><input type="checkbox" value="3"> Gen3</label>
+        <label><input type="checkbox" value="4"> Gen4</label>
+        <label><input type="checkbox" value="5"> Gen5</label>
+        <label><input type="checkbox" value="6"> Gen6</label>
+        <label><input type="checkbox" value="7"> Gen7</label>
+        <label><input type="checkbox" value="8"> Gen8</label>
+        <label><input type="checkbox" value="9"> Gen9</label>
 
-<label>
-<input type="checkbox" id="hardMode">
-Hard mode
-</label>
+    </div>
+
+    <label>
+        <input type="checkbox" id="hardModeOption">
+        Hard mode
+    </label>
+
+    <br><br>
+
+    <button onclick="saveOptions()">💾 Sauvegarder</button>
+    <button onclick="closeOptions()">⬅ Retour</button>
 
 </div>
 

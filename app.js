@@ -22,17 +22,33 @@ const generations={
 9:[906,1025]
 }
 
+let options={
+language:"fr",
+hardMode:false,
+gens:[1,2,3,4,5,6,7,8,9]
+}
+
+function loadOptions(){
+
+    const saved=JSON.parse(localStorage.getItem("pokemonOptions"))
+
+    if(saved) options=saved
+
+    document.getElementById("languageOption").value=options.language
+    document.getElementById("hardModeOption").checked=options.hardMode
+
+    document.querySelectorAll("#genSelector input").forEach(cb=>{
+
+        cb.checked=options.gens.includes(parseInt(cb.value))
+
+    })
+
+}
+
 async function loadPokedex(){
 
 const res=await fetch("data/pokedex.json")
 pokedex=await res.json()
-
-}
-
-function getSelectedGenerations(){
-
-return [...document.querySelectorAll("#genSelector input:checked")]
-.map(e=>parseInt(e.value))
 
 }
 
@@ -73,23 +89,59 @@ items[suggestionIndex].textContent
 
 function startGame(){
 
-document.getElementById("mainMenu").classList.add("hidden")
-document.getElementById("game").classList.remove("hidden")
+    document.getElementById("mainMenu").classList.add("hidden")
+    document.getElementById("game").classList.remove("hidden")
 
-nextPokemon()
+    nextPokemon()
+
+}
+
+function openOptions(){
+
+    document.getElementById("mainMenu").classList.add("hidden")
+    document.getElementById("optionsMenu").classList.remove("hidden")
+
+    loadOptions()
+
+}
+
+function closeOptions(){
+
+    document.getElementById("optionsMenu").classList.add("hidden")
+    document.getElementById("mainMenu").classList.remove("hidden")
+
+}
+
+function saveOptions(){
+
+    const language=document.getElementById("languageOption").value
+    const hardMode=document.getElementById("hardModeOption").checked
+
+    const gens=[...document.querySelectorAll("#genSelector input:checked")]
+    .map(e=>parseInt(e.value))
+
+    localStorage.setItem("pokemonOptions",JSON.stringify({
+
+    language,
+    hardMode,
+    gens
+
+    }))
+
+    closeOptions()
 
 }
 
 function backToMenu(){
 
-document.getElementById("game").classList.add("hidden")
-document.getElementById("mainMenu").classList.remove("hidden")
+    document.getElementById("game").classList.add("hidden")
+    document.getElementById("mainMenu").classList.remove("hidden")
 
 }
 
 function getRandomPokemon(){
 
-const gens=getSelectedGenerations()
+const gens=options.gens
 
 let pool=[]
 
@@ -167,7 +219,7 @@ hints.appendChild(span)
 
 }
 
-if(document.getElementById("hardMode").checked){
+if(options.hardMode){
 
 hints.innerHTML=`Color: ${currentPokemon.color}`
 
@@ -178,7 +230,7 @@ hints.innerHTML=`Color: ${currentPokemon.color}`
 function checkAnswer(){
 
 const guess=document.getElementById("guess").value.toLowerCase().trim()
-const lang=document.getElementById("language").value
+const lang=options.language
 
 const correct=currentPokemon.names[lang]
 
@@ -236,7 +288,7 @@ const sprite=document.getElementById("sprite")
 
 sprite.style.display="none"
 
-const lang=document.getElementById("language").value
+const lang=options.language
 
 compare.innerHTML=`
 
@@ -286,7 +338,7 @@ startCompare()
 function updateSuggestions(){
 
 const input=document.getElementById("guess").value.toLowerCase()
-const lang=document.getElementById("language").value
+const lang=options.language
 const box=document.getElementById("suggestions")
 
 box.innerHTML=""
