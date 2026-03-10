@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 
 <meta charset="UTF-8">
@@ -16,15 +17,19 @@
 
 <body>
 
+<!-- MENU PRINCIPAL -->
+
 <div id="mainMenu" class="menu">
 
 <h1>Pokédex Guess Game</h1>
 
-<button onclick="startGame()">Jouer</button>
-<button onclick="showLeaderboard()">Leaderboard</button>
+<button onclick="startGame()">🎮 Jouer</button>
+<button onclick="showLeaderboard()">🏆 Leaderboard</button>
 
 </div>
 
+
+<!-- JEU -->
 
 <div id="game" class="hidden">
 
@@ -33,46 +38,72 @@
 <div class="controls">
 
 <select id="mode">
+
 <option value="silhouette">Silhouette</option>
 <option value="back">Sprite dos</option>
 <option value="types">Types + couleurs</option>
 <option value="pokedex">Description Pokédex</option>
 <option value="compare">Comparaison</option>
+
 </select>
 
 <select id="language">
+
 <option value="fr">FR</option>
 <option value="en">EN</option>
+<option value="de">DE</option>
+<option value="es">ES</option>
+<option value="it">IT</option>
+
 </select>
 
 </div>
 
+
+<!-- ÉCRAN POKÉDEX -->
 
 <div class="screen">
 
 <img id="sprite">
 
 <div id="hints"></div>
+
 <div id="compare"></div>
 
 </div>
 
 
-<div>
+<!-- INPUT -->
+
+<div class="guessBox">
 
 <input id="guess" placeholder="Nom du Pokémon">
+
 <button id="validateBtn">OK</button>
+
 <button id="skipBtn">Skip</button>
 
 </div>
 
 
+<!-- RESULTAT -->
+
+<div id="result"></div>
+
+
+<!-- SCORE -->
+
 <div id="score">Score: 0</div>
+
 <div id="streak">Streak: 0</div>
 
-<button onclick="backToMenu()">Retour menu</button>
+
+<!-- RETOUR -->
+
+<button onclick="backToMenu()">⬅ Retour menu</button>
 
 </div>
+
 
 <script src="app.js"></script>
 
