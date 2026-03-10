@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Who's That Pokémon?</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;text-align:center;background:#f5f5f5;margin:0;padding:10px}
+h1{margin-top:10px}
+#sprite{image-rendering:pixelated;width:180px;height:180px;max-width:80vw}
+.silhouette{filter:brightness(0)}
+input,button,select{padding:10px;font-size:16px;margin:5px}
+button{cursor:pointer}
+#result{margin-top:10px;font-weight:bold}
+#score{margin-top:5px}
+#leaderboard{margin-top:20px}
+#leaderboard ol{padding-left:20px;text-align:left;max-width:250px;margin:auto}
+.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+</style>
+</head>
+<body>
+
+<h1>Who's that Pokémon?</h1>
+
+<div class="controls">
+<select id="language">
+<option value="fr">Français</option>
+<option value="en">English</option>
+<option value="de">Deutsch</option>
+<option value="es">Español</option>
+<option value="it">Italiano</option>
+<option value="ja">日本語</option>
+<option value="ko">한국어</option>
+</select>
+
+<select id="generation">
+<option value="all">Toutes générations</option>
+<option value="1">Gen 1</option>
+<option value="2">Gen 2</option>
+<option value="3">Gen 3</option>
+<option value="4">Gen 4</option>
+<option value="5">Gen 5</option>
+<option value="6">Gen 6</option>
+<option value="7">Gen 7</option>
+<option value="8">Gen 8</option>
+<option value="9">Gen 9</option>
+</select>
+
+<label>
+<input type="checkbox" id="progressive" /> silhouette progressive
+</label>
+</div>
+
+<div>
+<img id="sprite" class="silhouette" />
+</div>
+
+<div>
+<input id="guess" placeholder="Nom du Pokémon" />
+<button onclick="checkAnswer()">Valider</button>
+<button onclick="nextPokemon()">Suivant</button>
+</div>
+
+<div id="result"></div>
+<div id="score">Score: 0</div>
+
+<div id="leaderboard">
+<h3>Leaderboard</h3>
+<ol id="scores"></ol>
+<input id="playerName" placeholder="Ton nom" />
+<button onclick="saveScore()">Sauver score</button>
+</div>
+
+<script>
+
+// ===== GENERATION RANGES =====
+const generations = {
+1:[1,151],
+2:[152,251],
+3:[252,386],
+4:[387,493],
+5:[494,649],
+6:[650,721],
+7:[722,809],
+8:[810,905],
+9:[906,1025]
+}
+
+// ===== STATE =====
+let pokemonCache=[]
+let currentPokemon=null
+let score=0
+let revealInterval=null
+
+// ===== LOAD ALL POKEMON =====
+async function loadPokemon(){
+
+const MAX=1025
+
+const promises=[]
+
+for(let i=1;i<=MAX;i++){
+ promises.push(loadOne(i))
+}
+
+pokemonCache=await Promise.all(promises)
+
+nextPokemon()
+}
+
+async function loadOne(id){
+
+const p=await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+const pdata=await p.json()
+
+const s=await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`)
+const sdata=await s.json()
+
+const names={}
+
+sdata.names.forEach(n=>{
+ names[n.language.name]=n.name.toLowerCase()
+})
+
+return{
+ id,
+ sprite:pdata.sprites.front_default,
+ names
+}
+
+}
+
+// ===== FILTER BY GENERATION =====
+function getFilteredPokemon(){
+
+const gen=document.getElementById("generation").value
+
+if(gen==="all") return pokemonCache
+
+const range=generations[gen]
+
+return pokemonCache.filter(p=>p.id>=range[0] && p.id<=range[1])
+
+}
+
+// ===== NEXT POKEMON =====
+function nextPokemon(){
+
+if(revealInterval) clearInterval(revealInterval)
+
+const list=getFilteredPokemon()
+
+const index=Math.floor(Math.random()*list.length)
+
+currentPokemon=list[index]
+
+const sprite=document.getElementById("sprite")
+
+sprite.src=currentPokemon.sprite
+sprite.classList.add("silhouette")
+
+if(document.getElementById("progressive").checked){
+ startProgressiveReveal()
+}
+
+document.getElementById("guess").value=""
+document.getElementById("result").textContent=""
+
+}
+
+// ===== PROGRESSIVE SILHOUETTE =====
+function startProgressiveReveal(){
+
+let level=0
+const sprite=document.getElementById("sprite")
+
+revealInterval=setInterval(()=>{
+
+level+=10
+
+sprite.style.filter=`brightness(${level/100})`
+
+if(level>=100){
+ clearInterval(revealInterval)
+}
+
+},1000)
+
+}
+
+// ===== CHECK ANSWER =====
+function checkAnswer(){
+
+const guess=document.getElementById("guess").value.toLowerCase().trim()
+const lang=document.getElementById("language").value
+
+const correct=currentPokemon.names[lang]
+
+const sprite=document.getElementById("sprite")
+
+if(guess===correct){
+ score++
+ document.getElementById("result").textContent=`Correct ! ${correct}`
+}else{
+ document.getElementById("result").textContent=`Raté ! C'était ${correct}`
+}
+
+sprite.classList.remove("silhouette")
+
+sprite.style.filter=""
+
+clearInterval(revealInterval)
+
+document.getElementById("score").textContent=`Score: ${score}`
+
+}
+
+// ===== LEADERBOARD =====
+function loadScores(){
+
+const list=document.getElementById("scores")
+
+list.innerHTML=""
+
+const scores=JSON.parse(localStorage.getItem("pokemonScores")||"[]")
+
+scores.sort((a,b)=>b.score-a.score)
+
+scores.slice(0,10).forEach(s=>{
+
+const li=document.createElement("li")
+
+li.textContent=`${s.name} - ${s.score}`
+
+list.appendChild(li)
+
+})
+
+}
+
+function saveScore(){
+
+const name=document.getElementById("playerName").value||"Player"
+
+const scores=JSON.parse(localStorage.getItem("pokemonScores")||"[]")
+
+scores.push({name,score})
+
+localStorage.setItem("pokemonScores",JSON.stringify(scores))
+
+loadScores()
+
+}
+
+// ===== INIT =====
+
+loadScores()
+loadPokemon()
+
+</script>
+
+</body>
+</html>
