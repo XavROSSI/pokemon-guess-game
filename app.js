@@ -7,11 +7,67 @@ let streak=0
 let compareA=null
 let compareB=null
 let compareStat="weight"
+let suggestionIndex=-1
+let currentSuggestions=[]
+
+const generations={
+1:[1,151],
+2:[152,251],
+3:[252,386],
+4:[387,493],
+5:[494,649],
+6:[650,721],
+7:[722,809],
+8:[810,905],
+9:[906,1025]
+}
 
 async function loadPokedex(){
 
 const res=await fetch("data/pokedex.json")
 pokedex=await res.json()
+
+}
+
+function getSelectedGenerations(){
+
+return [...document.querySelectorAll("#genSelector input:checked")]
+.map(e=>parseInt(e.value))
+
+}
+
+function navigateSuggestions(e){
+
+const items=document.querySelectorAll(".suggestion")
+
+if(!items.length) return
+
+if(e.key==="ArrowDown"){
+
+suggestionIndex++
+
+if(suggestionIndex>=items.length) suggestionIndex=0
+
+}
+
+if(e.key==="ArrowUp"){
+
+suggestionIndex--
+
+if(suggestionIndex<0) suggestionIndex=items.length-1
+
+}
+
+items.forEach(el=>el.classList.remove("active"))
+
+if(items[suggestionIndex]){
+
+items[suggestionIndex].classList.add("active")
+
+document.getElementById("guess").value=
+items[suggestionIndex].textContent
+
+}
 
 }
 
@@ -33,7 +89,25 @@ document.getElementById("mainMenu").classList.remove("hidden")
 
 function getRandomPokemon(){
 
+const gens=getSelectedGenerations()
+
+let pool=[]
+
+gens.forEach(g=>{
+
+const [min,max]=generations[g]
+
+pool=pool.concat(
+pokedex.filter(p=>p.id>=min && p.id<=max)
+)
+
+})
+
+if(pool.length===0){
 return pokedex[Math.floor(Math.random()*pokedex.length)]
+}
+
+return pool[Math.floor(Math.random()*pool.length)]
 
 }
 
@@ -212,21 +286,20 @@ startCompare()
 function updateSuggestions(){
 
 const input=document.getElementById("guess").value.toLowerCase()
-
 const lang=document.getElementById("language").value
-
 const box=document.getElementById("suggestions")
 
 box.innerHTML=""
+suggestionIndex=-1
 
 if(input.length<2) return
 
-const matches=pokedex
+currentSuggestions=pokedex
 .map(p=>p.names[lang])
 .filter(name=>name.startsWith(input))
 .slice(0,6)
 
-matches.forEach(name=>{
+currentSuggestions.forEach((name,i)=>{
 
 const div=document.createElement("div")
 div.className="suggestion"
@@ -254,13 +327,21 @@ document.getElementById("mode").addEventListener("change",nextPokemon)
 
 document.getElementById("language").addEventListener("change",nextPokemon)
 
-document.getElementById("guess").addEventListener("keydown",e=>{
+const guessInput=document.getElementById("guess")
+
+guessInput.addEventListener("input",updateSuggestions)
+
+guessInput.addEventListener("keydown",e=>{
 
 if(e.key==="Enter"){
 checkAnswer()
 }
 
-})
+if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+navigateSuggestions(e)
+}
+
+}))
 
 document.getElementById("guess").addEventListener("input",updateSuggestions)
 

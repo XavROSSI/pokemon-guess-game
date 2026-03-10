@@ -30,15 +30,24 @@ color:black;
 border-radius:10px;
 padding:20px;
 margin:20px auto;
-max-width:350px;
+max-width:420px;
+height:220px;
+
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
 
 }
 
 #sprite{
 
-width:180px;
-height:180px;
+width:160px;
+height:160px;
 image-rendering:pixelated;
+
+display:block;
+margin:auto;
 
 }
 
@@ -121,4 +130,43 @@ animation:reveal 0.4s ease;
 0%{filter:brightness(0)}
 100%{filter:none}
 
+}
+
+.gens{
+
+margin-top:10px;
+
+}
+
+.gens label{
+
+background:#c62828;
+padding:4px 8px;
+border-radius:6px;
+margin:2px;
+display:inline-block;
+
+}
+
+.suggestions{
+background:white;
+color:black;
+max-width:220px;
+margin:4px auto;
+border-radius:6px;
+overflow:hidden;
+}
+
+.suggestion{
+padding:6px;
+cursor:pointer;
+}
+
+.suggestion:hover{
+background:#eee;
+}
+
+.suggestion.active{
+background:#1976d2;
+color:white;
 }

@@ -9,40 +9,44 @@
 <title>Pokédex Guess Game</title>
 
 <link rel="stylesheet" href="style.css">
-<link rel="manifest" href="pwa/manifest.json">
-
-<meta name="theme-color" content="#d32f2f">
 
 </head>
 
 <body>
-
-<!-- MENU PRINCIPAL -->
 
 <div id="mainMenu" class="menu">
 
 <h1>Pokédex Guess Game</h1>
 
 <button onclick="startGame()">🎮 Jouer</button>
-<button onclick="showLeaderboard()">🏆 Leaderboard</button>
 
 </div>
 
-
-<!-- JEU -->
 
 <div id="game" class="hidden">
 
 <h2>Who's that Pokémon?</h2>
 
 <div class="controls">
+<div id="genSelector" class="gens">
+
+<label><input type="checkbox" value="1" checked> Gen1</label>
+<label><input type="checkbox" value="2" checked> Gen2</label>
+<label><input type="checkbox" value="3" checked> Gen3</label>
+<label><input type="checkbox" value="4" checked> Gen4</label>
+<label><input type="checkbox" value="5" checked> Gen5</label>
+<label><input type="checkbox" value="6" checked> Gen6</label>
+<label><input type="checkbox" value="7" checked> Gen7</label>
+<label><input type="checkbox" value="8" checked> Gen8</label>
+<label><input type="checkbox" value="9" checked> Gen9</label>
+
+</div>
 
 <select id="mode">
 
 <option value="silhouette">Silhouette</option>
 <option value="back">Sprite dos</option>
-<option value="types">Types + couleurs</option>
-<option value="pokedex">Description Pokédex</option>
+<option value="types">Types</option>
 <option value="compare">Comparaison</option>
 
 </select>
@@ -51,16 +55,16 @@
 
 <option value="fr">FR</option>
 <option value="en">EN</option>
-<option value="de">DE</option>
-<option value="es">ES</option>
-<option value="it">IT</option>
 
 </select>
 
+<label>
+<input type="checkbox" id="hardMode">
+Hard mode
+</label>
+
 </div>
 
-
-<!-- ÉCRAN POKÉDEX -->
 
 <div class="screen">
 
@@ -73,35 +77,25 @@
 </div>
 
 
-<!-- INPUT -->
-
 <div class="guessBox">
 
-<input id="guess" placeholder="Nom du Pokémon">
+<input id="guess" placeholder="Nom du Pokémon" autocomplete="off">
+
 <div id="suggestions" class="suggestions"></div>
 
 <button id="validateBtn">OK</button>
-
 <button id="skipBtn">Skip</button>
 
 </div>
 
 
-<!-- RESULTAT -->
-
 <div id="result"></div>
-
-
-<!-- SCORE -->
 
 <div id="score">Score: 0</div>
 
 <div id="streak">Streak: 0</div>
 
-
-<!-- RETOUR -->
-
-<button onclick="backToMenu()">⬅ Retour menu</button>
+<button onclick="backToMenu()">Retour menu</button>
 
 </div>
 
